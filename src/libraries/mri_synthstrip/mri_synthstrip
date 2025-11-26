@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 
+# All or portions of this licensed product (such portions are the "Software")
+# have been obtained under license from The General Hospital Corporation ("MGH")
+# and are subject to the following terms and conditions:
+#
+# This file is redistributed unmodified from the FreeSurfer project
+# (https://surfer.nmr.mgh.harvard.edu/).
+#
+# The full FreeSurfer Software License Agreement is provided in:
+#     third_party/freesurfer/LICENSE_FREESURFER.txt
+
 import os
 import sys
 import argparse
