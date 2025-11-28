@@ -6,7 +6,7 @@ Model checkpoints have been made publicly available for [download on HuggingFace
 
 ## License
 
-This project uses a multiple licenses structure:
+This project uses a multi-license structure:
 
 - **Code**: Licensed under the Apache License 2.0 - see [code LICENSE](LICENSE)
 - **Models**: Licensed under CC BY-NC 4.0 - see [model LICENSE](https://huggingface.co/IADI-Nancy/FDOPA-PET-GliomaSeg/blob/main/LICENSE.txt)
