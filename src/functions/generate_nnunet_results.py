@@ -4,6 +4,7 @@ import shutil
 import json
 import time
 import datetime
+import shutil
 import pandas as pd
 import numpy as np
 from ..utils.data_utils import get_dataset_fullname
@@ -104,6 +105,9 @@ if __name__ == '__main__':
     crossval_results_dir = os.path.join(dataset_model_dir, 'crossval_results_folds_0_1_2_3_4')
     if not os.path.exists(crossval_results_dir):
         os.system('nnUNetv2_find_best_configuration %s -p %s -c %s -tr %s' % (full_dataset_name, args.nnUNet_plans, args.configuration, args.nnUNet_trainer))
+    # Copy file containing command line arguments for nnUNet dataset generation because it is needed for inference
+    shutil.copy(os.path.join(nnunet_raw_root, full_dataset_name, 'commandline_args.txt'), 
+                os.path.join(dataset_model_dir,'dataset_commandline_args.txt'))
     if args.force_postprocessing and not os.path.exists(os.path.join(crossval_results_dir, 'forced_postprocessed')):
         # Create a postprocessing.pkl with functions we want to force postprocessing according to our will
         label_link = load_json(os.path.join(os.environ.get('nnUNet_raw'), full_dataset_name, 'dataset.json'))['labels']

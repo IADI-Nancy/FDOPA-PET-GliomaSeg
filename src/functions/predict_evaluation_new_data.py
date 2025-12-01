@@ -266,9 +266,10 @@ if __name__ == '__main__':
     sitk.ProcessObject_SetGlobalDefaultCoordinateTolerance(1e-2)
         
     # Load database creation arguments and label information
-    nnunet_raw_root = os.environ.get('nnUNet_raw')
-    database_args = load_json(os.path.join(nnunet_raw_root, full_dataset_name, 'commandline_args.txt'))
-    dataset_json = load_json(os.path.join(nnunet_raw_root, full_dataset_name, 'dataset.json'))
+    dataset_model_dir = os.path.join(os.environ.get('nnUNet_results'), full_dataset_name, 
+                                '%s__%s__%s' % (args.nnUNet_trainer, args.nnUNet_plans, args.configuration))
+    database_args = load_json(os.path.join(dataset_model_dir, 'dataset_commandline_args.txt'))
+    dataset_json = load_json(os.path.join(dataset_model_dir, 'dataset.json'))
     label_link = {label_name.lower(): label for label_name, label in dataset_json['labels'].items() if label_name != 'background'}
     n_labels = len(label_link.keys())
     
@@ -421,8 +422,6 @@ if __name__ == '__main__':
                                                                                                                     args.nnUNet_plans, args.configuration, args.nnUNet_trainer))
     # Run post processing if needed
     print('==== Post processing ====')
-    dataset_model_dir = os.path.join(os.environ.get('nnUNet_results'), full_dataset_name, 
-                                    '%s__%s__%s' % (args.nnUNet_trainer, args.nnUNet_plans, args.configuration))
     crossval_results_dir = os.path.join(dataset_model_dir, 'crossval_results_folds_0_1_2_3_4')
     if os.path.exists(os.path.join(crossval_results_dir, 'postprocessing.json')):
         pp_json = load_json(os.path.join(crossval_results_dir, 'postprocessing.json'))
@@ -477,7 +476,6 @@ if __name__ == '__main__':
     # 4. Analyze results 
     # If GT VOI(s) are given, analysis with segmentation metrics + quantitative results on GT + pred
     # Else quantitative on pred only
-    # TODO: output TBR? at least quantitative analysis if not input labels
     if os.listdir(input_nnunet_label_dir):
         # Get results with nnunet evaluation in summary.json
         for output in ['raw', 'postprocessed', 'forced_pp']:
@@ -512,15 +510,24 @@ if __name__ == '__main__':
                 global_results_dic[output].to_excel(writer, sheet_name='%s_Sample' % output)
     else:
         global_results_dic = {}
-        output_list = ['raw', 'processed', 'forced_pp'] if args.force_postprocessing else ['raw', 'processed']
-        for output in output_list:
+        for output in ['raw', 'processed', 'forced_pp']:
+            if output == 'raw':
+                pred_output = os.path.join(output_dir, 'nnUNet_results')
+            elif output == 'forced_pp':
+                if not args.force_postprocessing:
+                    continue
+                pred_output = os.path.join(output_dir, 'nnUNet_results', 'forced_postprocessed')
+            else:
+                if pp_pkl_file is None:
+                    continue
+                pred_output = os.path.join(output_dir, 'nnUNet_results', 'postprocessed')
             output_dic = {'nnUnet ID': [], 'Original ID': []}
             # get file ending
             file_ending = dataset_json['file_ending']
-            all_files_pred = subfiles(os.path.join(output_dir, 'nnUNet_results'), suffix=file_ending, join=True)
+            all_files_pred = subfiles(pred_output, suffix=file_ending, join=True)
             for file_pred in all_files_pred:
                 nnUNet_patient_id = os.path.basename(file_pred).split('.nii.gz')[0].split('PETseg_')[1]
-                original_patient_id = patient_link_df.loc[nnUNet_patient_id, 'Original ID']
+                original_patient_id = patient_link_df.set_index('nnUNet ID').loc[nnUNet_patient_id, 'Original ID']
                 pred_mask = sitk.ReadImage(file_pred)
                 input_image = sitk.ReadImage(os.path.join(output_dir, 'nnUNet_data', 'imagesTs', 'PETseg_%s_0000.nii.gz' % nnUNet_patient_id))
                 patient_results = evaluation_utils.compute_quantitative(input_image, pred_mask, label_link, nan_for_nonexisting=True)
@@ -535,3 +542,4 @@ if __name__ == '__main__':
             for output in global_results_dic:
                 global_results_dic[output].to_excel(writer, sheet_name='%s_Sample' % output)
     # TODO : if dicom is given in input make dicom RT Struct in output (need resampling to original image if needed)
+    # voir https://github.com/qurit/rt-utils/issues/87
