@@ -324,15 +324,12 @@ def get_patient_res(patient_res, patient_link_df, label_link, input_image_dir):
     return (nnUNet_patient_id, original_patient_id, patient_results)
 
 
-def extract_global_results(full_dataset_name, patient_link_df, summary_dir, input_image_dir,
+def extract_global_results(patient_link_df, summary_dir, input_image_dir,
                            force_postprocessing=False, n_jobs=25):
     """Extract the results for all the patients trained for a model dataset and a model type
 
     Parameters
         ----------
-        full_dataset_name : string
-            Name of the dataset to analyze
-
         patient_link_df : pd.DataFrame
             Dataframe with at least two columns : 'nnUnet ID' fpr IDs in nnUNet format 
             and 'Original ID' which is original IDs
@@ -349,12 +346,9 @@ def extract_global_results(full_dataset_name, patient_link_df, summary_dir, inpu
             Contains the results of raw data
     """
     
-    nnunet_raw_data_dir = os.environ.get('nnUNet_raw')
     # Retrieve label information from dataset.json file
-    dataset_raw_data_dir = os.path.join(nnunet_raw_data_dir, full_dataset_name)
-    label_link = load_json(os.path.join(dataset_raw_data_dir, 'dataset.json'))['labels']
+    label_link = load_json(os.path.join(summary_dir, 'dataset.json'))['labels']
     label_link = {label_name: label for label_name, label in label_link.items() if label_name != 'background'}
-    n_labels = len(label_link.keys())
     results_dic = {}
     output_list = ['raw', 'processed', 'forced_pp'] if force_postprocessing else ['raw', 'processed']
     for output in output_list:

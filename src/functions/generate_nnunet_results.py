@@ -149,8 +149,7 @@ if __name__ == '__main__':
     # Get results on training set
     with pd.ExcelWriter(os.path.join(results_save_dir, 'Global_results_train.xlsx')) as writer:
         # Get results by samples
-        train_global_results_dic = extract_global_results(full_dataset_name, 
-                                                          train_patient_link_df.set_index('nnUNet ID', append=True).reset_index(level=0), 
+        train_global_results_dic = extract_global_results(train_patient_link_df.set_index('nnUNet ID', append=True).reset_index(level=0), 
                                                           os.path.join(dataset_model_dir, 'crossval_results_folds_0_1_2_3_4'), 
                                                           os.path.join(nnunet_raw_root, full_dataset_name, 'imagesTr'), 
                                                           force_postprocessing=args.force_postprocessing)
@@ -251,8 +250,7 @@ if __name__ == '__main__':
         
         with pd.ExcelWriter(os.path.join(results_save_dir, 'Global_results_test.xlsx')) as writer:
             # Get results by samples
-            test_global_results_dic = extract_global_results(full_dataset_name, 
-                                                             test_patient_link_df.set_index('nnUNet ID', append=True).reset_index(level=0),
+            test_global_results_dic = extract_global_results(test_patient_link_df.set_index('nnUNet ID', append=True).reset_index(level=0),
                                                              os.path.join(dataset_model_dir, 'test_results_folds_0_1_2_3_4'),
                                                              os.path.join(nnunet_raw_root, full_dataset_name, 'imagesTs'), 
                                                              force_postprocessing=args.force_postprocessing)

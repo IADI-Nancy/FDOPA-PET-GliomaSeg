@@ -495,7 +495,7 @@ if __name__ == '__main__':
                                                         os.path.join(summary_dir, 'summary.json'))
         with pd.ExcelWriter(os.path.join(output_dir, 'nnUNet_results', 'Global_results.xlsx')) as writer:
             # Get results by samples
-            global_results_dic = evaluation_utils.extract_global_results(full_dataset_name, patient_link_df.set_index('nnUNet ID'), 
+            global_results_dic = evaluation_utils.extract_global_results(patient_link_df.set_index('nnUNet ID'), 
                                                                    os.path.join(output_dir, 'nnUNet_results'), 
                                                                    os.path.join(output_dir, 'nnUNet_data', 'imagesTs'),
                                                                    force_postprocessing=args.force_postprocessing)
