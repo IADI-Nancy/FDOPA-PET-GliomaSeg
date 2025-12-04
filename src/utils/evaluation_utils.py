@@ -358,12 +358,15 @@ def extract_global_results(patient_link_df, summary_dir, input_image_dir,
         elif output == 'forced_pp':
             summary_path = os.path.join(summary_dir, 'forced_postprocessed', 'summary.json')
         else:
-            # We will check that a postprocessing was applied otherwise no need to analyze it
-            # information is stored in postprocessing.json, the field "postprocessing_fns" is empty if no postprocessing was applied
-            pp_json = load_json(os.path.join(summary_dir, 'postprocessing.json'))
-            if not pp_json["postprocessing_fns"]:
+            if os.path.exists(os.path.join(summary_dir, 'postprocessing.json')):
+                # We will check that a postprocessing was applied otherwise no need to analyze it
+                # information is stored in postprocessing.json, the field "postprocessing_fns" is empty if no postprocessing was applied
+                pp_json = load_json(os.path.join(summary_dir, 'postprocessing.json'))
+                if not pp_json["postprocessing_fns"]:
+                    continue
+                summary_path = os.path.join(summary_dir, 'postprocessed', 'summary.json')
+            else:
                 continue
-            summary_path = os.path.join(summary_dir, 'postprocessed', 'summary.json')
         nnunet_summary = load_json(summary_path) 
         out = Parallel(n_jobs=n_jobs)(delayed(get_patient_res)(patient_res, patient_link_df, label_link, input_image_dir) 
                           for patient_res in nnunet_summary["metric_per_case"])
