@@ -21,10 +21,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate nn-Unet results')
     parser.add_argument("--recap_results_file", help='file in which recapitulative results are saved', required=True, type=str)
     parser.add_argument("--dataset", help='Dataset name or dataset number', required=True, type=str)
-    parser.add_argument("--train_images_root", help='Root directory of train image dataset', type=str,
-                        default='/home/pyuser/data/nnUnet_GliomaSeg')
+    parser.add_argument("--train_images_root", help='Root directory of train image dataset', type=str)
     parser.add_argument("--train_data_info_file", help='file with information on train population to exclude patients',
-                        type=str, default='/home/pyuser/data/nnUnet_GliomaSeg/data_info.xlsx')
+                        type=str)
     parser.add_argument("--test_images_root", help='Root directory of test image dataset', type=str,
                         default=None)
     parser.add_argument("--test_data_info_file", help='file with information on test population to exclude patients',
