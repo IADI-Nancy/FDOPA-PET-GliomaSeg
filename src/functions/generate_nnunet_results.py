@@ -85,9 +85,6 @@ if __name__ == '__main__':
         # Change indexes with nnUNet IDs
     train_data_info_file['nnUNet ID'] = train_patient_link_df['nnUNet ID']
     train_data_info_file.set_index('nnUNet ID', inplace=True)
-        # Add column with mixed factors
-    train_data_info_file['Device_Carbidopa'] = train_data_info_file['Device'].astype(str) + '_C' + train_data_info_file['Carbidopa'].astype(str)
-    train_data_info_file['Log10_volume'] = np.log10(train_data_info_file['Seg_volume_mL'] + 1)
     
     # Retrieve fold information
     fold_comp = load_json(os.path.join(os.environ.get('nnUNet_preprocessed'), full_dataset_name, "splits_final.json"))
@@ -198,9 +195,6 @@ if __name__ == '__main__':
             # Change indexes with nnUNet IDs
         test_data_info_file['nnUNet ID'] = test_patient_link_df['nnUNet ID']
         test_data_info_file.set_index('nnUNet ID', inplace=True)
-            # Add column with mixed factors
-        test_data_info_file['Device_Carbidopa'] = test_data_info_file['Device'].astype(str) + '_C' + test_data_info_file['Carbidopa'].astype(str)
-        test_data_info_file['Log10_volume'] = np.log10(test_data_info_file['Seg_volume_mL'] + 1)
 
         if os.path.exists(os.path.join(nnunet_raw_root, full_dataset_name, 'imagesTs')) and \
             os.listdir(os.path.join(nnunet_raw_root, full_dataset_name, 'imagesTs')):
