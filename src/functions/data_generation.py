@@ -581,7 +581,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate nn-Unet database')
     parser.add_argument("--input_dir", help='Root directory for input image and ROI dataset', type=str, required=True)
     parser.add_argument("--output_dir", help='Root directory for output image and ROI dataset', type=str, required=True)
-    parser.add_argument("--data_info_file", help='file with information on population', type=str, required=True)
+    parser.add_argument("--data_info_file", help='file with information on population', type=str, default=None)
     parser.add_argument('--postprocessROI', help='Apply postprocessing on ROI generated semi-automatically', 
                         action='store_true', default=False)
     parser.add_argument('--skullstripping', help='Perform skullstripping', 
@@ -592,6 +592,10 @@ if __name__ == '__main__':
     output_dir = os.path.abspath(args.output_dir)
     os.makedirs(output_dir, exist_ok=True)
     data_info_file_path = os.path.abspath(args.data_info_file)
+    
+    patients_list = [patient for patient in natsorted(os.listdir(input_dir)) 
+                     if os.path.exists(os.path.join(input_dir, patient, 'Static_PET')) and 
+                     os.path.exists(os.path.join(input_dir, patient, 'ROI'))]
 
     # TODO: handle case with no data_info_file ? create it here ? Is it really mandatory?
     if '.xlsx' in args.data_info_file:
@@ -599,7 +603,7 @@ if __name__ == '__main__':
     elif '.csv' in args.data_info_file:
         data_info_file = pd.read_csv(data_info_file_path, index_col=0, dtype={'ID': str})
     else:
-        raise ValueError
+        data_info_file = pd.DataFrame({'ID': patients_list}).set_index('ID')
     
     if args.skullstripping:
         # fix threading correctly
@@ -627,77 +631,76 @@ if __name__ == '__main__':
                 raise RuntimeError("several entries found in PATH for mri_synthstrip. Ensure there is only one.")
     
     lesion_info = {'Seg_detection': {}, 'Seg_volume_mL': {}, 'Threshold_seg': {}}
-    for patient in natsorted(os.listdir(input_dir)):
+    for patient in patients_list:
         print(patient)
-        if os.path.exists(os.path.join(input_dir, patient, 'Static_PET')) and os.path.exists(os.path.join(input_dir, patient, 'ROI')):
-            static_image, missing_static_instances = read_dicom_image(dicom_dir=os.path.join(input_dir, patient, 'Static_PET'))
-            roi_dic = load_rois(os.path.join(input_dir, patient, 'ROI'))
-            # If missing slices in image also apply in ROI
-            if missing_static_instances:
-                for roi in roi_dic:
-                    if roi_dic[roi].GetSize()[-1] != static_image.GetSize()[-1]:
-                        roi_dic[roi] = interpolate_roi_missing_slices(static_image, roi_dic[roi], missing_static_instances)
-            # Correct the case where loading saved image results in different origin (approx 1e-5 mm differences)
+        static_image, missing_static_instances = read_dicom_image(dicom_dir=os.path.join(input_dir, patient, 'Static_PET'))
+        roi_dic = load_rois(os.path.join(input_dir, patient, 'ROI'))
+        # If missing slices in image also apply in ROI
+        if missing_static_instances:
             for roi in roi_dic:
-                roi_dic[roi] = correct_origin(static_image, roi_dic[roi], tol=1e-2)
-            if 'TumorBox' in roi_dic:
-                label_shape = sitk.LabelShapeStatisticsImageFilter()
-                threshold_factor = 1.6
-                roi, threshold = tumor_TBR_segmentation(static_image, roi_dic['TumorBox'], roi_dic['Brain'], threshold_factor=threshold_factor)
-                if args.postprocessROI:
-                    # Resample to 1mm isotropic
-                    _, roi_resampled = IBSI_resampling(static_image, roi, resampledPixelSpacing=(1 ,1, 1))
-                    # Opening by Reconstruction with 1mm isotropic kernel
-                    processed_roi_resampled = segmentation_post_treatment(roi_resampled, [1, 1, 1], method='OpeningReconstruction', use_image_spacing=False, select_biggest=False)
-                    # Resample back to original spacing
-                    processed_roi = sitk.Resample(processed_roi_resampled, roi, sitk.Transform(), sitk.sitkLabelLinear)
-                    label_shape.Execute(processed_roi)
-                    if 1 in label_shape.GetLabels():
-                        # Accept processed roi only if we still have a volume after
-                        roi = processed_roi
-                roi_dic['Tumor_TBR%s_seg' % str(threshold_factor).replace('.', ',')] = roi
-                label_shape.Execute(roi_dic['TumorBox'])
-                if 1 not in label_shape.GetLabels():
-                    lesion_type = "no_measurable"
-                    label_shape.Execute(roi_dic['Tumor_TBR%s_seg' % str(threshold_factor).replace('.', ',')])
-                    if 1 in label_shape.GetLabels():
-                        lesion_vol = label_shape.GetPhysicalSize(1) / 1000 # cm3/mL
-                        raise ValueError("Lesion vol should be 0 when TumorBox vol is 0. Got %.3f" % lesion_vol)
-                    else:
-                        lesion_vol = 0
+                if roi_dic[roi].GetSize()[-1] != static_image.GetSize()[-1]:
+                    roi_dic[roi] = interpolate_roi_missing_slices(static_image, roi_dic[roi], missing_static_instances)
+        # Correct the case where loading saved image results in different origin (approx 1e-5 mm differences)
+        for roi in roi_dic:
+            roi_dic[roi] = correct_origin(static_image, roi_dic[roi], tol=1e-2)
+        if 'TumorBox' in roi_dic:
+            label_shape = sitk.LabelShapeStatisticsImageFilter()
+            threshold_factor = 1.6
+            roi, threshold = tumor_TBR_segmentation(static_image, roi_dic['TumorBox'], roi_dic['Brain'], threshold_factor=threshold_factor)
+            if args.postprocessROI:
+                # Resample to 1mm isotropic
+                _, roi_resampled = IBSI_resampling(static_image, roi, resampledPixelSpacing=(1 ,1, 1))
+                # Opening by Reconstruction with 1mm isotropic kernel
+                processed_roi_resampled = segmentation_post_treatment(roi_resampled, [1, 1, 1], method='OpeningReconstruction', use_image_spacing=False, select_biggest=False)
+                # Resample back to original spacing
+                processed_roi = sitk.Resample(processed_roi_resampled, roi, sitk.Transform(), sitk.sitkLabelLinear)
+                label_shape.Execute(processed_roi)
+                if 1 in label_shape.GetLabels():
+                    # Accept processed roi only if we still have a volume after
+                    roi = processed_roi
+            roi_dic['Tumor_TBR%s_seg' % str(threshold_factor).replace('.', ',')] = roi
+            label_shape.Execute(roi_dic['TumorBox'])
+            if 1 not in label_shape.GetLabels():
+                lesion_type = "no_measurable"
+                label_shape.Execute(roi_dic['Tumor_TBR%s_seg' % str(threshold_factor).replace('.', ',')])
+                if 1 in label_shape.GetLabels():
+                    lesion_vol = label_shape.GetPhysicalSize(1) / 1000 # cm3/mL
+                    raise ValueError("Lesion vol should be 0 when TumorBox vol is 0. Got %.3f" % lesion_vol)
                 else:
-                    label_shape.Execute(roi_dic['Tumor_TBR%s_seg' % str(threshold_factor).replace('.', ',')])
-                    if 1 not in label_shape.GetLabels():
-                        lesion_vol = 0
-                    else:
-                        lesion_vol = label_shape.GetPhysicalSize(1) / 1000 # cm3/mL
-                    if lesion_vol <= 0.5:
-                        lesion_type = "non_measurable"
-                    else:
-                        lesion_type = "measurable"
-                lesion_info['Seg_detection'][patient] = lesion_type
-                lesion_info['Seg_volume_mL'][patient] = lesion_vol
-                lesion_info['Threshold_seg'][patient] = threshold
-            # Save all
-            os.makedirs(os.path.join(output_dir, patient, 'ROI'), exist_ok=True)
-            sitk.WriteImage(static_image, os.path.join(output_dir, patient, 'Static_PET.nii.gz'))
-            roi_path = {}
-            for roi in roi_dic:
-                sitk.WriteImage(sitk.Cast(roi_dic[roi], sitk.sitkUInt8), os.path.join(output_dir, patient, 'ROI', '%s.nii.gz' % roi))
-                roi_path[roi] = os.path.join(output_dir, patient, 'ROI', '%s.nii.gz' % roi)
+                    lesion_vol = 0
+            else:
+                label_shape.Execute(roi_dic['Tumor_TBR%s_seg' % str(threshold_factor).replace('.', ',')])
+                if 1 not in label_shape.GetLabels():
+                    lesion_vol = 0
+                else:
+                    lesion_vol = label_shape.GetPhysicalSize(1) / 1000 # cm3/mL
+                if lesion_vol <= 0.5:
+                    lesion_type = "non_measurable"
+                else:
+                    lesion_type = "measurable"
+            lesion_info['Seg_detection'][patient] = lesion_type
+            lesion_info['Seg_volume_mL'][patient] = lesion_vol
+            lesion_info['Threshold_seg'][patient] = threshold
+        # Save all
+        os.makedirs(os.path.join(output_dir, patient, 'ROI'), exist_ok=True)
+        sitk.WriteImage(static_image, os.path.join(output_dir, patient, 'Static_PET.nii.gz'))
+        roi_path = {}
+        for roi in roi_dic:
+            sitk.WriteImage(sitk.Cast(roi_dic[roi], sitk.sitkUInt8), os.path.join(output_dir, patient, 'ROI', '%s.nii.gz' % roi))
+            roi_path[roi] = os.path.join(output_dir, patient, 'ROI', '%s.nii.gz' % roi)
 
-            # Run skull stripping using SynthStrip https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/
-            if args.skullstripping:
-                input_image_path = os.path.join(output_dir, patient, 'Static_PET.nii.gz')
-                output_image_path = os.path.join(output_dir, patient, 'Static_PET_skullstripped.nii.gz')
-                output_mask_path = os.path.join(output_dir, patient, 'Static_PET_skullstripped_mask.nii.gz')
-                subprocess.run(['mri_synthstrip', '-i', input_image_path, '-o', output_image_path, '-m', output_mask_path,
-                                '--model', model_path], check=True, env=env)
-                # Ensure that values are equal to 0 outside of skullstrip mask. Sometimes we add small values
-                skullstrip_mask = sitk.ReadImage(os.path.join(output_dir, patient, 'Static_PET_skullstripped_mask.nii.gz'))
-                skullstrip_image = sitk.ReadImage(os.path.join(output_dir, patient, 'Static_PET_skullstripped.nii.gz'))
-                sitk.WriteImage(sitk.Mask(skullstrip_image, skullstrip_mask), os.path.join(output_dir, patient, 'Static_PET_skullstripped.nii.gz'))
-    
+        # Run skull stripping using SynthStrip https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/
+        if args.skullstripping:
+            input_image_path = os.path.join(output_dir, patient, 'Static_PET.nii.gz')
+            output_image_path = os.path.join(output_dir, patient, 'Static_PET_skullstripped.nii.gz')
+            output_mask_path = os.path.join(output_dir, patient, 'Static_PET_skullstripped_mask.nii.gz')
+            subprocess.run(['mri_synthstrip', '-i', input_image_path, '-o', output_image_path, '-m', output_mask_path,
+                            '--model', model_path], check=True, env=env)
+            # Ensure that values are equal to 0 outside of skullstrip mask. Sometimes we add small values
+            skullstrip_mask = sitk.ReadImage(os.path.join(output_dir, patient, 'Static_PET_skullstripped_mask.nii.gz'))
+            skullstrip_image = sitk.ReadImage(os.path.join(output_dir, patient, 'Static_PET_skullstripped.nii.gz'))
+            sitk.WriteImage(sitk.Mask(skullstrip_image, skullstrip_mask), os.path.join(output_dir, patient, 'Static_PET_skullstripped.nii.gz'))
+
     # add info about no-measurable/non-measurable/measurable lesion + Seg volume in data_info file
     for col in lesion_info:
         data_info_file[col] = pd.Series(lesion_info[col])
