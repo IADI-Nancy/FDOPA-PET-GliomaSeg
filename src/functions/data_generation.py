@@ -597,7 +597,6 @@ if __name__ == '__main__':
                      if os.path.exists(os.path.join(input_dir, patient, 'Static_PET')) and 
                      os.path.exists(os.path.join(input_dir, patient, 'ROI'))]
 
-    # TODO: handle case with no data_info_file ? create it here ? Is it really mandatory?
     if '.xlsx' in args.data_info_file:
         data_info_file = pd.read_excel(data_info_file_path, index_col=0, dtype={'ID': str})
     elif '.csv' in args.data_info_file:
