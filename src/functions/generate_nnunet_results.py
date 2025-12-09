@@ -21,9 +21,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate nn-Unet results')
     parser.add_argument("--recap_results_file", help='file in which recapitulative results are saved', required=True, type=str)
     parser.add_argument("--dataset", help='Dataset name or dataset number', required=True, type=str)
-    parser.add_argument("--train_images_root", help='Root directory of train image dataset', type=str)
-    parser.add_argument("--test_images_root", help='Root directory of test image dataset', type=str,
-                        default=None)
     parser.add_argument("--nnUNet_trainer", help='nnUNet_trainer used for training', type=str,
                         default='nnUNetTrainer')
     parser.add_argument("--nnUNet_plans", help='nnUNet plans used for training', type=str, default='nnUNetPlans')
