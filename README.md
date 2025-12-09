@@ -1,5 +1,5 @@
 # FDOPA-PET-GliomaSeg
-FDOPA-PET-GliomaSeg is a deep learning model for automated glioma segmentation on [¹⁸F]FDOPA PET. Developed from a modified nnU-Netv2 framework and trained on multicenter clinical data, FDOPA-PET-GliomaSeg provides robust and generalizable tumor delineation across scanners and institutions. This repository contains the source code for the article "External Validation of an Automated Model for the Extraction of Brain Amino Acid PET Parameters: Application to [18F]F-FDOPA PET" (submitted to Journal of Nuclear Medicine).
+FDOPA-PET-GliomaSeg is a deep learning model for automated glioma segmentation on [¹⁸F]FDOPA PET. Developed from a modified nnU-Netv2 framework and trained on multicenter clinical data, FDOPA-PET-GliomaSeg provides robust and generalizable tumor delineation across scanners and institutions. This repository contains the source code for the article "Automatic Extraction of PET RANO Criteria with an Externally Validated Deep Learning Model: Application to [18F]F-FDOPA PET Imaging" (submitted to Neuro-Oncology).
 
 ## Model
 Model checkpoints have been made publicly available for [download on HuggingFace](https://huggingface.co/IADI-Nancy/FDOPA-PET-GliomaSeg).
