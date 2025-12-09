@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 from ..utils.data_utils import get_dataset_fullname
 from ..utils.evaluation_utils import extract_global_results, extract_fold_results
-from ..utils.post_hoc_tests import model_post_hoc_tests, rank_and_compare_models
+from ..utils.post_hoc_tests import rank_and_compare_models
 from batchgenerators.utilities.file_and_folder_operations import load_json, save_pickle, save_json
 from nnunetv2.utilities.json_export import recursive_fix_for_json_export
 from nnunetv2.evaluation.evaluate_predictions import compute_metrics_on_folder2, label_or_region_to_key
@@ -174,8 +174,6 @@ if __name__ == '__main__':
             # Write results by samples and fold
             train_global_results_dic[output].to_excel(writer, sheet_name='%s_Sample' % output)
             fold_results_dic[output].transpose().to_excel(writer, sheet_name='%s_Fold' % output)
-        # Post-hoc tests
-        model_post_hoc_tests(args.configuration, train_global_results_dic, train_data_info_file, os.path.join(results_save_dir, 'Train_post_hoc_tests'))
 
     if args.test_images_root is not None:
 
@@ -273,8 +271,6 @@ if __name__ == '__main__':
                 # Write results by samples and fold
                 test_overall_mean_std.transpose().to_excel(writer, sheet_name='%s_Fold' % output)
                 test_global_results_dic[output].to_excel(writer, sheet_name='%s_Sample' % output)
-                # Post-hoc tests
-                model_post_hoc_tests(args.configuration, test_global_results_dic, test_data_info_file, os.path.join(results_save_dir, 'Test_post_hoc_tests'))
 
     if not len(recap_results_file_dic[list(recap_results_file_dic.keys())[0]].index) == 1 and args.rank_models:
         # Rank models and compare them
