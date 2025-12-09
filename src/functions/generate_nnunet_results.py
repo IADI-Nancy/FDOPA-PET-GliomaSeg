@@ -152,14 +152,12 @@ if __name__ == '__main__':
             train_global_results_dic[output].to_excel(writer, sheet_name='%s_Sample' % output)
             fold_results_dic[output].transpose().to_excel(writer, sheet_name='%s_Fold' % output)
 
-    if args.test_images_root is not None:
+    if os.path.exists(os.path.join(nnunet_raw_root, full_dataset_name, 'imagesTs')) and \
+            os.listdir(os.path.join(nnunet_raw_root, full_dataset_name, 'imagesTs')):
         
         test_patient_link_df = pd.read_csv(os.path.join(nnunet_raw_root, full_dataset_name, 'Test_Patient_link.csv'),
                                            index_col=1, dtype={'Original ID': str, 'nnUNet ID': str})  # Index = Original ID
-
-        if os.path.exists(os.path.join(nnunet_raw_root, full_dataset_name, 'imagesTs')) and \
-            os.listdir(os.path.join(nnunet_raw_root, full_dataset_name, 'imagesTs')):
-            test_results_dir = os.path.join(dataset_model_dir, 'test_results_folds_0_1_2_3_4')
+        test_results_dir = os.path.join(dataset_model_dir, 'test_results_folds_0_1_2_3_4')
         if not os.path.exists(test_results_dir):
             # Run prediction
             os.system('nnUNetv2_predict -d %s -i %s -o %s -f 0 1 2 3 4 -p %s -c %s -tr %s -npp 10 -nps 10 -device cuda' % (full_dataset_name, 
