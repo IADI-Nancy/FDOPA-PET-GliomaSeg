@@ -22,12 +22,8 @@ if __name__ == '__main__':
     parser.add_argument("--recap_results_file", help='file in which recapitulative results are saved', required=True, type=str)
     parser.add_argument("--dataset", help='Dataset name or dataset number', required=True, type=str)
     parser.add_argument("--train_images_root", help='Root directory of train image dataset', type=str)
-    parser.add_argument("--train_data_info_file", help='file with information on train population to exclude patients',
-                        type=str)
     parser.add_argument("--test_images_root", help='Root directory of test image dataset', type=str,
                         default=None)
-    parser.add_argument("--test_data_info_file", help='file with information on test population to exclude patients',
-                        type=str, default=None)
     parser.add_argument("--nnUNet_trainer", help='nnUNet_trainer used for training', type=str,
                         default='nnUNetTrainer')
     parser.add_argument("--nnUNet_plans", help='nnUNet plans used for training', type=str, default='nnUNetPlans')
@@ -50,9 +46,6 @@ if __name__ == '__main__':
         full_dataset_name = get_dataset_fullname(dataset_number=args.dataset)
     else:
         full_dataset_name = get_dataset_fullname(dataset_name=args.dataset)
-
-    if (args.test_images_root is not None and args.test_data_info_file is None) or (args.test_images_root is None and args.test_data_info_file is not None):
-        raise ValueError('If one of test_images_root or test_data_info_file is given, the other must also be given.')
     
     # Load database creation arguments
     nnunet_raw_root = os.environ.get('nnUNet_raw')
@@ -69,21 +62,8 @@ if __name__ == '__main__':
         os.makedirs(os.path.dirname(args.recap_results_file), exist_ok=True)
         recap_results_file_dic = {}
     
-    # Load and prepare data information
-    if '.xlsx' in args.train_data_info_file:
-        train_data_info_file = pd.read_excel(os.path.abspath(args.train_data_info_file), index_col=0, dtype={'ID': str})
-    elif '.csv' in args.train_data_info_file:
-        train_data_info_file = pd.read_csv(os.path.abspath(args.train_data_info_file), index_col=0, dtype={'ID': str})
-    else:
-        raise ValueError
-    
     train_patient_link_df = pd.read_csv(os.path.join(nnunet_raw_root, full_dataset_name, 'Train_Patient_link.csv'),
                                         index_col=1, dtype={'Original ID': str, 'nnUNet ID': str})  # Index = Original ID
-        # Select only samples that were used in current task
-    train_data_info_file = train_data_info_file[train_data_info_file.index.isin(train_patient_link_df.index)]
-        # Change indexes with nnUNet IDs
-    train_data_info_file['nnUNet ID'] = train_patient_link_df['nnUNet ID']
-    train_data_info_file.set_index('nnUNet ID', inplace=True)
     
     # Retrieve fold information
     fold_comp = load_json(os.path.join(os.environ.get('nnUNet_preprocessed'), full_dataset_name, "splits_final.json"))
@@ -176,22 +156,9 @@ if __name__ == '__main__':
             fold_results_dic[output].transpose().to_excel(writer, sheet_name='%s_Fold' % output)
 
     if args.test_images_root is not None:
-
-        # Load and prepare data information
-        if '.xlsx' in args.test_data_info_file:
-            test_data_info_file = pd.read_excel(os.path.abspath(args.test_data_info_file), index_col=0, dtype={'ID': str})
-        elif '.csv' in args.test_data_info_file:
-            test_data_info_file = pd.read_csv(os.path.abspath(args.test_data_info_file), index_col=0, dtype={'ID': str})
-        else:
-            raise ValueError
         
         test_patient_link_df = pd.read_csv(os.path.join(nnunet_raw_root, full_dataset_name, 'Test_Patient_link.csv'),
                                            index_col=1, dtype={'Original ID': str, 'nnUNet ID': str})  # Index = Original ID
-            # Select only samples that were used in current task
-        test_data_info_file = test_data_info_file[test_data_info_file.index.isin(test_patient_link_df.index)]
-            # Change indexes with nnUNet IDs
-        test_data_info_file['nnUNet ID'] = test_patient_link_df['nnUNet ID']
-        test_data_info_file.set_index('nnUNet ID', inplace=True)
 
         if os.path.exists(os.path.join(nnunet_raw_root, full_dataset_name, 'imagesTs')) and \
             os.listdir(os.path.join(nnunet_raw_root, full_dataset_name, 'imagesTs')):
