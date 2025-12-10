@@ -33,7 +33,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 	&& apt install git-lfs \
 	&& rm -rf /var/lib/apt/lists/* \
 	# # install other python dependencies and nnUNetv2
-	# && pip install --force-reinstall --no-cache-dir networkx==3.1 typing_extensions==4.11.0 opencv-python==4.11.0.86 \
+	&& pip install --force-reinstall --no-cache-dir networkx==3.1 typing_extensions==4.11.0 opencv-python==4.11.0.86 \
 	&& pip install -e /root/src/libraries/nnUNetv2/nnUNet \
 	&& pip install --no-cache-dir -r requirements.txt \
 	# create nnunet directories
