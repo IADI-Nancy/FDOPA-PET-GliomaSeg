@@ -56,8 +56,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 	&& mv $nnUNet_raw/Dataset509_GliomaSeg_prepro_resample_only/dataset_commandline_args.txt $nnUNet_raw/Dataset509_GliomaSeg_prepro_resample_only/commandline_args.txt \
 	&& cp $nnUNet_results/Dataset509_GliomaSeg_prepro_resample_only/nnUNetTrainer__nnUNetPlans__3d_fullres/dataset.json $nnUNet_results/Dataset509_GliomaSeg_prepro_resample_only/nnUNetTrainer__nnUNetPlans__3d_fullres/plans.json $nnUNet_preprocessed/Dataset509_GliomaSeg_prepro_resample_only/ \
 	&& mv $nnUNet_preprocessed/Dataset509_GliomaSeg_prepro_resample_only/plans.json $nnUNet_preprocessed/Dataset509_GliomaSeg_prepro_resample_only/nnUNetPlans.json
-
-# pip install --no-cache-dir torch==2.3.0 torchvision==0.18.0 torchaudio==2.3.0 --index-url https://download.pytorch.org/whl/cu121 
 	
 WORKDIR /root
 ENTRYPOINT ["/bin/bash"]
