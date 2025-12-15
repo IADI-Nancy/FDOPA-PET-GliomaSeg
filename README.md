@@ -20,15 +20,17 @@ In order to run this Docker, if you use a GPU, your GPU is expected to have a Co
 This image also works on CPU but with reduced performance.
 ### Setup
 1. Build Docker image from Docker file
+
 Mandatory arguments:
 - `IMAGE_NAME`: name of the image (ex. `fdopa-pet-gliomaseg`)
 - `IMAGE_VERSION`: version of the image (ex. `pytorch2.3.0-cuda12.1-cudnn8`)
+
 Run in your terminal: 
 ```bash
 docker build -t IMAGE_NAME:IMAGE_VERSION -f ./docker/Dockerfile --rm=true .
 ```
-2. Run 
-a container 
+2. Run a container
+
 Mandatory arguments:
 - `CONTAINER_NAME`: name of the container (ex. `inference-fdopa-pet-gliomaseg`)
 - `IMAGE_NAME`: previously defined name of the image (ex. `fdopa-pet-gliomaseg`)
@@ -41,19 +43,23 @@ Optional_arguments
 - `GROUP_ID`: user ID on the computer (ex. on Linux obtained by running `id -g` in the terminal)
 
 2.1. For a single command and remove afterward
+
 Supplementary mandatory arguments:
 - `COMMAND`: command to run in the container, see [How to use scripts](how_to_use_scripts.md)
+
 Run in your terminal:
 ```bash
 docker run --rm -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --name CONTAINER_NAME -u USER_ID:GROUP_ID IMAGE_NAME:IMAGE_VERSION -c "COMMAND"
 ```
 
 2.2 In detached interactive mode
+
 Run in your terminal:
 ```bash
 docker run -itd -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --name CONTAINER_NAME IMAGE_NAME:IMAGE_VERSION
 docker exec -it -u USER_ID:GROUP_ID CONTAINER_NAME /bin/bash
 ```
+
 Starting from this point, the user can run any script interactively (python scripts from [How to use scripts](how_to_use_scripts.md) for example).
 
 ## Inference
@@ -67,6 +73,7 @@ docker run --rm -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --nam
 ```
 
 2. Run directly with Python
+
 This command should be run inside the Docker container (interactive mode) or in a local environment where all dependencies (Python, CUDA, PyTorch, nnU-Net, etc.) are properly installed and configured.
 ```bash
 python -m src.functions.predict_evaluation_new_data --input_dir PREDICT_INPUT_DIR --output_dir PREDICT_OUTPUT_DIR --dataset GliomaSeg_prepro_resample_only --nnUNet_trainer nnUNetTrainer --nnUNet_plans nnUNetPlans --configuration 3d_fullres --force_postprocessing
