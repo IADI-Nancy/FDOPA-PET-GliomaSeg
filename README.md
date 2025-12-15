@@ -39,8 +39,6 @@ Mandatory arguments:
 
 Optional_arguments
 - `GPU_NUMBER`: GPU devices to add to the container, see [documentation](https://docs.docker.com/reference/cli/docker/container/run/#gpus) (ex. `all` or `device=0`)
-- `USER_ID`: user ID on the computer (ex. on Linux obtained by running `id -u` in the terminal)
-- `GROUP_ID`: user ID on the computer (ex. on Linux obtained by running `id -g` in the terminal)
 
 2.1. For a single command and remove afterward
 
@@ -49,7 +47,7 @@ Supplementary mandatory arguments:
 
 Run in your terminal:
 ```bash
-docker run --rm -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --name CONTAINER_NAME -u USER_ID:GROUP_ID IMAGE_NAME:IMAGE_VERSION -c "COMMAND"
+docker run --rm -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --name CONTAINER_NAME IMAGE_NAME:IMAGE_VERSION -c "COMMAND"
 ```
 
 2.2 In detached interactive mode
@@ -57,7 +55,7 @@ docker run --rm -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --nam
 Run in your terminal:
 ```bash
 docker run -itd -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --name CONTAINER_NAME IMAGE_NAME:IMAGE_VERSION
-docker exec -it -u USER_ID:GROUP_ID CONTAINER_NAME /bin/bash
+docker exec -it CONTAINER_NAME /bin/bash
 ```
 
 Starting from this point, the user can run any script interactively (python scripts from [How to use scripts](how_to_use_scripts.md) for example).
@@ -69,7 +67,7 @@ To segment new [18F]F-FDOPA PET images using our trained model, after building t
 
 1. Run with Docker (recommended)
 ```bash
-docker run --rm -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --name CONTAINER_NAME -e UID=USER_ID -e GID=GROUP_ID IMAGE_NAME:IMAGE_VERSION -c "python -m src.functions.predict_evaluation_new_data --input_dir PREDICT_INPUT_DIR --output_dir PREDICT_OUTPUT_DIR --dataset GliomaSeg_prepro_resample_only --nnUNet_trainer nnUNetTrainer --nnUNet_plans nnUNetPlans --configuration 3d_fullres --force_postprocessing"
+docker run --rm -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --name CONTAINER_NAME IMAGE_NAME:IMAGE_VERSION -c "python -m src.functions.predict_evaluation_new_data --input_dir PREDICT_INPUT_DIR --output_dir PREDICT_OUTPUT_DIR --dataset GliomaSeg_prepro_resample_only --nnUNet_trainer nnUNetTrainer --nnUNet_plans nnUNetPlans --configuration 3d_fullres --force_postprocessing"
 ```
 
 2. Run directly with Python
