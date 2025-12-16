@@ -248,6 +248,8 @@ if __name__ == '__main__':
     parser.add_argument("--nnUNet_trainer", help='nnUNet trainer name', type=str, required=True)
     parser.add_argument("--nnUNet_plans", help='nnUNet plan name', type=str, required=True)
     parser.add_argument("--configuration", help='Model configuration', type=str, required=True)
+    parser.add_argument("--device", help='Device on which inference is done (see nnUNetv2_predict arguments)', type=str, required=True,
+                        default='cuda', choices=['cuda', 'cpu', 'mps'])
     parser.add_argument("--force_postprocessing", 
                         help="On the sidelines of nnunet best post-processing, apply a force post-processing with "
                         "morphological_opening_by_reconstruction on tumor and remove_homolateral_healthy_brain on brain if present", 
@@ -416,10 +418,11 @@ if __name__ == '__main__':
     # Generate predictions as usual as no ensembling is needed
     pred_output = os.path.join(output_dir, 'nnUNet_results')
     # Run prediction
-    os.system('nnUNetv2_predict -d %s -i %s -o %s -f 0 1 2 3 4 -p %s -c %s -tr %s -npp 10 -nps 10 -device cuda' % (full_dataset_name, 
+    os.system('nnUNetv2_predict -d %s -i %s -o %s -f 0 1 2 3 4 -p %s -c %s -tr %s -npp 10 -nps 10 -device %s' % (full_dataset_name, 
                                                                                                                     os.path.join(output_dir, 'nnUNet_data', 'imagesTs'),
                                                                                                                     pred_output,
-                                                                                                                    args.nnUNet_plans, args.configuration, args.nnUNet_trainer))
+                                                                                                                    args.nnUNet_plans, args.configuration, args.nnUNet_trainer,
+                                                                                                                    args.device))
     # Run post processing if needed
     print('==== Post processing ====')
     crossval_results_dir = os.path.join(dataset_model_dir, 'crossval_results_folds_0_1_2_3_4')
