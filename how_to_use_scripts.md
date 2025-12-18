@@ -165,11 +165,12 @@ python -m src.functions.generate_nnunet_results --recap_results_file RECAP_RESUL
 `--nnUNet_trainer TRAINER`: Trainer name used for nnU-Net training (required)
 `--nnUNet_plans PLANS`: Plan name used for nnU-Net training (required)
 `--configuration CONFIGURATION`: Model configuration used for nnU-Net training (e.g., 3d_fullres). (required)
+`--device DEVICE`: Device on which inference is done (see nnUNetv2_predict arguments, default `cuda` for inference on GPU)
 `--force_postprocessing`: If set, also applies additional post-processing as in our article (morphological opening on tumor, removal of homolateral healthy brain) (optional flag)
 
 Command-line example:
 ```bash
-python -m src.functions.predict_evaluation_new_data --input_dir PREDICT_INPUT_DIR --output_dir PREDICT_OUTPUT_DIR --dataset DATASET_NAME_OR_NUMBER --nnUNet_trainer TRAINER --nnUNet_plans PLANS --configuration CONFIGURATION --force_postprocessing
+python -m src.functions.predict_evaluation_new_data --input_dir PREDICT_INPUT_DIR --output_dir PREDICT_OUTPUT_DIR --dataset DATASET_NAME_OR_NUMBER --nnUNet_trainer TRAINER --nnUNet_plans PLANS --configuration CONFIGURATION --device DEVICE --force_postprocessing
 ```
 
 ## Expected Folder Structure

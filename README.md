@@ -67,28 +67,31 @@ To segment new [18F]F-FDOPA PET images using our trained model, after building t
 
 1. Run with Docker (recommended)
 ```bash
-docker run --rm -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --name CONTAINER_NAME IMAGE_NAME:IMAGE_VERSION -c "python -m src.functions.predict_evaluation_new_data --input_dir PREDICT_INPUT_DIR --output_dir PREDICT_OUTPUT_DIR --dataset GliomaSeg_prepro_resample_only --nnUNet_trainer nnUNetTrainer --nnUNet_plans nnUNetPlans --configuration 3d_fullres --force_postprocessing"
+docker run --rm -v PATH_TO_DATA:/root/data --gpus GPU_NUMBER --shm-size=8g --name CONTAINER_NAME IMAGE_NAME:IMAGE_VERSION -c "python -m src.functions.predict_evaluation_new_data --input_dir PREDICT_INPUT_DIR --output_dir PREDICT_OUTPUT_DIR --dataset GliomaSeg_prepro_resample_only --nnUNet_trainer nnUNetTrainer --nnUNet_plans nnUNetPlans --configuration 3d_fullres --force_postprocessing --device DEVICE"
 ```
 
 2. Run directly with Python
 
 This command should be run inside the Docker container (interactive mode) or in a local environment where all dependencies (Python, CUDA, PyTorch, nnU-Net, etc.) are properly installed and configured.
 ```bash
-python -m src.functions.predict_evaluation_new_data --input_dir PREDICT_INPUT_DIR --output_dir PREDICT_OUTPUT_DIR --dataset GliomaSeg_prepro_resample_only --nnUNet_trainer nnUNetTrainer --nnUNet_plans nnUNetPlans --configuration 3d_fullres --force_postprocessing
+python -m src.functions.predict_evaluation_new_data --input_dir PREDICT_INPUT_DIR --output_dir PREDICT_OUTPUT_DIR --dataset GliomaSeg_prepro_resample_only --nnUNet_trainer nnUNetTrainer --nnUNet_plans nnUNetPlans --configuration 3d_fullres --device DEVICE --force_postprocessing
 ```
 
-with `PREDICT_INPUT_DIR` and `PREDICT_OUTPUT_DIR` being the root directory containing new patient data and where the outputs will be saved, respectively.
+with `PREDICT_INPUT_DIR` and `PREDICT_OUTPUT_DIR` being the root directory containing new patient data and where the outputs will be saved, respectively. `DEVICE` is the device on which the inference will be performed (see nnUNetv2_predict arguments, default `cuda` for inference on GPU).
+
 To get more details on the other scripts, advanced options, database preparation, training or evaluation, please consult [How to use scripts](how_to_use_scripts.md).
 
 ### Inference times
 
 Mean inference time using the inference script, including preprocessing, inference, and postprocessing:
 
-| Device          | Device type    | Time / patient    |
-|-----------------|----------------|-------------------|
-| NVIDIA A100     | GPU            | ~40s              |
-| Quadro RTX 8000 | GPU            | ~1min05s          |
-| Quadro RTX 5000 | GPU            | ~1min20s          |
+| Device           | Device type    | Time / patient    |
+|------------------|----------------|-------------------|
+| NVIDIA A100      | GPU            | ~40s              |
+| Quadro RTX 8000  | GPU            | ~1min05s          |
+| Quadro RTX 5000  | GPU            | ~1min20s          |
+| Geforce RTX 3060 | GPU            | ~2min             |
+| AMD Ryzen 7 5800H| CPU            | ~1h30min          |
 
 
 ## License
