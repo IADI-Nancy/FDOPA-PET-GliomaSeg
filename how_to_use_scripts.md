@@ -4,17 +4,18 @@
 
 ## Command-Line Arguments
 The script accepts the following arguments:
-`--input_dir DATASET_INPUT_DIR`: Root directory containing patient folders with DICOM images and ROI masks (required)
-`--output_dir DATASET_OUTPUT_DIR`: Directory where processed images, ROIs, and results will be saved (required)
-`--data_info_file DATA_INFO_FILE`: Path to a CSV or Excel file with population information (optional).
-If given, this file must contain one line per sample and, for example, the following columns:
-- `ID`: ID of the sample corresponding as its directory name (mandatory as first column)
-- `Device`: name of the device on which the acquisition was performed (used for stratification)
-- `Recurrence`: Whether the acquisition was performed at initial diagnosis (0) or not (1) (used for stratification)
-- `Problem_segmentation`: Binary variable encoding samples with any issue that we would like to exclude
-If the file doesn't exist, it will be created with columns containing information on the tumor segmentation (volume, threshold, measurable disease classification according to PET RANO criteria)
-`--postprocessROI`: If set, applies additional post-processing to tumor VOIs generated during segmentation (optional flag)
-`--skullstripping`: If set, performs skull-stripping on PET images using SynthStrip (optional flag)
+- `--input_dir DATASET_INPUT_DIR`: Root directory containing patient folders with DICOM images and ROI masks (required)
+- `--output_dir DATASET_OUTPUT_DIR`: Directory where processed images, ROIs, and results will be saved (required)
+- `--data_info_file DATA_INFO_FILE`: Path to a CSV or Excel file with population information (optional).
+If the file doesn't exist, it will be created with columns containing information on the tumor segmentation (volume, threshold, measurable disease classification according to PET RANO criteria). If given, this file must contain one line per sample and, for example, the following columns:
+    - `ID`: ID of the sample corresponding as its directory name (mandatory as first column)
+    - `Device`: name of the device on which the acquisition was performed (used for stratification)
+    - `Recurrence`: Whether the acquisition was performed at initial diagnosis (0) or not (1) (used for stratification)
+    - `Problem_segmentation`: Binary variable encoding samples with any issue that we would like to exclude 
+
+
+- `--postprocessROI`: If set, applies additional post-processing to tumor VOIs generated during segmentation (optional flag)
+- `--skullstripping`: If set, performs skull-stripping on PET images using SynthStrip (optional flag)
 
 Command-line example:
 ```bash
@@ -63,25 +64,25 @@ output_dir/
 `generate_nnunet_database` organizes and prepares medical imaging data for training and evaluating nnU-Net models. It collects PET images and segmentation masks, apply the preprocessing as detail in our article (with some other options), structures them according to nnU-Net’s requirements, and generates all necessary metadata and configuration files. The script run the `nnUNetv2_plan_and_preprocess` command internally. 
 
 ## Command-Line Arguments
-`--train_images_root TRAIN_IMAGES_ROOT`: Root directory containing training images and masks (required)
-`--train_data_info_file TRAIN_DATA_INFO_FILE`: CSV or Excel file with information on the training population (required).
+- `--train_images_root TRAIN_IMAGES_ROOT`: Root directory containing training images and masks (required)
+- `--train_data_info_file TRAIN_DATA_INFO_FILE`: CSV or Excel file with information on the training population (required).
 This file must contain one line per sample and, for example, the following columns:
-- `ID`: ID of the sample corresponding as its directory name (mandatory as first column)
-- `Device`: name of the device on which the acquisition was performed (used for stratification)
-- `Recurrence`: Whether the acquisition was performed at initial diagnosis (0) or not (1) (used for stratification)
-- `Problem_segmentation`: Binary variable encoding samples with any issue that we would like to exclude
-`--test_images_root TEST_IMAGES_ROOT`: Root directory for test images and masks (optional)
-`--test_data_info_file TEST_DATA_INFO_FILE`: CSV or Excel file with information on the test population (optional; required if --test_images_root is set). 
+    - `ID`: ID of the sample corresponding as its directory name (mandatory as first column)
+    - `Device`: name of the device on which the acquisition was performed (used for stratification)
+    - `Recurrence`: Whether the acquisition was performed at initial diagnosis (0) or not (1) (used for stratification)
+    - `Problem_segmentation`: Binary variable encoding samples with any issue that we would like to exclude
+- `--test_images_root TEST_IMAGES_ROOT`: Root directory for test images and masks (optional)
+- `--test_data_info_file TEST_DATA_INFO_FILE`: CSV or Excel file with information on the test population (optional; required if --test_images_root is set). 
 See `--train_data_info_file TRAIN_DATA_INFO_FILE`
-`--dataset DATASET_NAME`: Name for the nnU-Net dataset (required)
-`--skull_stripping`: Use skull-stripped images (optional flag)
-`--brain_centering`: Center brain in the image as preprocessing step (optional flag; requires skull-stripped masks)
-`--ref_spacing`: Reference isotropic spacing for resampling (default: 1.0 as used in the article)
-`--ref_size`: Reference image size for resampling (default: 256 256 164 as used in the article)
-`--labels`: Labels to use for training (only_tumor or tumor_brain, default: tumor_brain)
-`--threads`: Number of parallel threads (default: -1, i.e., all available)
-`--preprocessor`: Name of the preprocessor (default: DefaultPreprocessor)
-`--architecture`: Network architecture/planner variant (default: default)
+- `--dataset DATASET_NAME`: Name for the nnU-Net dataset (required)
+- `--skull_stripping`: Use skull-stripped images (optional flag)
+- `--brain_centering`: Center brain in the image as preprocessing step (optional flag; requires skull-stripped masks)
+- `--ref_spacing`: Reference isotropic spacing for resampling (default: 1.0 as used in the article)
+- `--ref_size`: Reference image size for resampling (default: 256 256 164 as used in the article)
+- `--labels`: Labels to use for training (only_tumor or tumor_brain, default: tumor_brain)
+- `--threads`: Number of parallel threads (default: -1, i.e., all available)
+- `--preprocessor`: Name of the preprocessor (default: DefaultPreprocessor)
+- `--architecture`: Network architecture/planner variant (default: default)
 
 Command-line example:
 ```bash
@@ -125,11 +126,11 @@ This script also automatically runs `nnUNetv2_plan_and_preprocess`, creating the
 ## Command-Line Arguments
 The script accepts the following arguments:
 
-`--nnUNet_trainer TRAINER`: Name of the nnU-Net trainer to use (default: nnUNetTrainer)
-`--nnUNet_plans PLANS`: Name of the nnU-Net plans to use (default: nnUNetPlans)
-`--configuration CONFIGURATION`: Training configuration (default: 3d_fullres)
-`--dataset DATASET_NUMBER`: Dataset name or number (required)
-`--start_fold START_FOLD`: Index of the starting fold (default: 0)
+- `--nnUNet_trainer TRAINER`: Name of the nnU-Net trainer to use (default: nnUNetTrainer)
+- `--nnUNet_plans PLANS`: Name of the nnU-Net plans to use (default: nnUNetPlans)
+- `--configuration CONFIGURATION`: Training configuration (default: 3d_fullres)
+- `--dataset DATASET_NUMBER`: Dataset name or number (required)
+- `--start_fold START_FOLD`: Index of the starting fold (default: 0)
 
 Command-line example:
 ```bash
@@ -141,13 +142,13 @@ python ~/src/functions/train_all_folds.py --dataset DATASET_NUMBER --configurati
 `generate_nnunet_results` automates the post-processing and evaluation of nnU-Net segmentation results. It collects predictions from all folds, applies post-processing if requested, computes performance metrics, and summarizes results for both training and test sets (if given). The script can also perform comparison with other models (model ranking) and exports all relevant metrics and summaries to Excel files for further analysis.
 
 ## Command-Line Arguments
-`--recap_results_file RECAP_RESULTS_FILE`: Path to the Excel file where summary results will be saved (required)
-`--dataset DATASET_NAME_OR_NUMBER`: Name or number of the nnU-Net dataset (required)
-`--nnUNet_trainer TRAINER`: Trainer used for nnU-Net training (default: nnUNetTrainer)
-`--nnUNet_plans PLANS`: Plans used for nnU-Net training (default: nnUNetPlans)
-`--configuration CONFIGURATION`: Model configuration used for nnU-Net training (default: 3d_fullres)
-`--force_postprocessing`: If set, also applies a predefined post-processing as in our article (morphological opening on tumor, removal of homolateral healthy brain) (optional flag)
-`--rank_models`: If set, performs pairwise model ranking and comparison (optional flag; may be slow for many models)
+- `--recap_results_file RECAP_RESULTS_FILE`: Path to the Excel file where summary results will be saved (required)
+- `--dataset DATASET_NAME_OR_NUMBER`: Name or number of the nnU-Net dataset (required)
+- `--nnUNet_trainer TRAINER`: Trainer used for nnU-Net training (default: nnUNetTrainer)
+- `--nnUNet_plans PLANS`: Plans used for nnU-Net training (default: nnUNetPlans)
+- `--configuration CONFIGURATION`: Model configuration used for nnU-Net training (default: 3d_fullres)
+- `--force_postprocessing`: If set, also applies a predefined post-processing as in our article (morphological opening on tumor, removal of homolateral healthy brain) (optional flag)
+- `--rank_models`: If set, performs pairwise model ranking and comparison (optional flag; may be slow for many models)
 
 Command-line example:
 ```bash
@@ -159,14 +160,14 @@ python -m src.functions.generate_nnunet_results --recap_results_file RECAP_RESUL
 `predict_evaluation_new_data` automates the inference and evaluation workflow for new medical imaging data using a trained nnU-Net model. It processes input images (DICOM or NIfTI), applies required preprocessing, generates segmentation predictions, and computes quantitative metrics or segmentation evaluation metrics if ground truth is available (binary NifTI masks). The script exports all results and metrics in a structured output directory for further analysis.
 
 ## Command-Line Arguments
-`--input_dir PREDICT_INPUT_DIR`: Root directory containing new patient data (required)
-`--output_dir PREDICT_OUTPUT_DIR`: Directory where all outputs (preprocessed data, predictions, results) will be saved (required)
-`--dataset DATASET_NAME_OR_NUMBER`: Name or number of the nnU-Net dataset to use for inference (required)
-`--nnUNet_trainer TRAINER`: Trainer name used for nnU-Net training (required)
-`--nnUNet_plans PLANS`: Plan name used for nnU-Net training (required)
-`--configuration CONFIGURATION`: Model configuration used for nnU-Net training (e.g., 3d_fullres). (required)
-`--device DEVICE`: Device on which inference is done (see nnUNetv2_predict arguments, default `cuda` for inference on GPU)
-`--force_postprocessing`: If set, also applies additional post-processing as in our article (morphological opening on tumor, removal of homolateral healthy brain) (optional flag)
+- `--input_dir PREDICT_INPUT_DIR`: Root directory containing new patient data (required)
+- `--output_dir PREDICT_OUTPUT_DIR`: Directory where all outputs (preprocessed data, predictions, results) will be saved (required)
+- `--dataset DATASET_NAME_OR_NUMBER`: Name or number of the nnU-Net dataset to use for inference (required)
+- `--nnUNet_trainer TRAINER`: Trainer name used for nnU-Net training (required)
+- `--nnUNet_plans PLANS`: Plan name used for nnU-Net training (required)
+- `--configuration CONFIGURATION`: Model configuration used for nnU-Net training (e.g., 3d_fullres). (required)
+- `--device DEVICE`: Device on which inference is done (see nnUNetv2_predict arguments, default `cuda` for inference on GPU)
+- `--force_postprocessing`: If set, also applies additional post-processing as in our article (morphological opening on tumor, removal of homolateral healthy brain) (optional flag)
 
 Command-line example:
 ```bash
