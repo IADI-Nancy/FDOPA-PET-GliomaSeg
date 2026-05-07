@@ -109,7 +109,9 @@ This software and its outputs are provided for research and educational purposes
 
 If you use this repository, please cite the original paper:
 
-@article{10.1093/neuonc/noag095,
+```
+@article{
+    fdopa_gliomaseg,
     author = {Zaragori, Timothée and Rozenblum, Laura and Rovera, Guido and Stien, Guilhem and Zinsz, Adeline and Taillandier, Luc and Rudà, Roberta and Laurenge, Alice and Morbelli, Silvia and Kas, Aurélie and Verger, Antoine},
     title = {Automatic Extraction of PET RANO Criteria with an Externally Validated Deep Learning Model: Application to [18F]FDOPA PET Imaging},
     journal = {Neuro-Oncology},
@@ -121,3 +123,4 @@ If you use this repository, please cite the original paper:
     url = {https://doi.org/10.1093/neuonc/noag095},
     eprint = {https://academic.oup.com/neuro-oncology/advance-article-pdf/doi/10.1093/neuonc/noag095/68221680/noag095.pdf},
 }
+```
